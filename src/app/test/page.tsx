@@ -4,6 +4,7 @@ import { useState } from 'react'
 import '../App.css'
 
 export default function TestPage() {
+  const [baseUrl, setBaseUrl] = useState(process.env.NEXT_PUBLIC_API_BASE_URL || '')
   const [result, setResult] = useState<string>('')
   const [loading, setLoading] = useState(false)
 
@@ -11,10 +12,8 @@ export default function TestPage() {
     setLoading(true)
     setResult('테스트 중...')
     try {
-      // 1. 테스트하려는 엔드포인트: /exercise/plan/search?planTypeCode=SWIM
-      // 이 URL이 실제로 존재하는 외부 API인지 확인이 필요합니다.
-      // 일단 호출을 시도해보고 결과를 보여줍니다.
-      const response = await fetch('/exercise/plan/search?planTypeCode=SWIM')
+      const fullUrl = `${baseUrl}/exercise/plan/search?planTypeCode=SWIM`
+      const response = await fetch(fullUrl)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -32,6 +31,17 @@ export default function TestPage() {
   return (
     <main style={{ padding: '20px' }}>
       <h1>API 통신 테스트</h1>
+      
+      <div style={{ marginBottom: '15px' }}>
+        <label>API Base URL: </label>
+        <input 
+          type="text" 
+          value={baseUrl} 
+          onChange={(e) => setBaseUrl(e.target.value)}
+          style={{ width: '100%', padding: '8px' }}
+        />
+      </div>
+
       <button 
         onClick={testApi} 
         disabled={loading}
