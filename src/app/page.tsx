@@ -1,25 +1,36 @@
+'use client'
+
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { getTemplates, Template } from '../api/templates'
 import TypeCodeSelector from '../components/TypeCodeSelector'
 import Link from 'next/link'
 import '../App.css'
 
-interface PageProps {
-  searchParams: Promise<{ typeCode?: string }>;
-}
-
-export default async function Page({ searchParams }: PageProps) {
-  const resolvedParams = await searchParams
-  const typeCode = resolvedParams.typeCode || 'SWIM'
+function PageContent() {
+  const searchParams = useSearchParams()
+  const typeCode = searchParams.get('typeCode') || 'SWIM'
   
-  let templates: Template[] = []
-  let error = false
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  try {
-    templates = await getTemplates({ typeCode })
-  } catch (e) {
-    console.error('Failed to fetch templates:', e)
-    error = true
-  }
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      setLoading(true)
+      try {
+        const data = await getTemplates({ typeCode })
+        setTemplates(data)
+        setError(false)
+      } catch (e) {
+        console.error('Failed to fetch templates:', e)
+        setError(true)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchTemplates()
+  }, [typeCode])
 
   return (
     <main className="app-shell">
@@ -38,15 +49,16 @@ export default async function Page({ searchParams }: PageProps) {
       </header>
 
       <section className="content-panel">
-        {error && (
+        {loading && <p className="state-text">Loading...</p>}
+        {!loading && error && (
           <p className="state-text">
             API connection failed. Check that Spring Boot is running on port 8080.
           </p>
         )}
-        {!error && templates.length === 0 && (
+        {!loading && !error && templates.length === 0 && (
           <p className="state-text">No templates found.</p>
         )}
-        {!error && templates.length > 0 && (
+        {!loading && !error && templates.length > 0 && (
           <ul className="template-list">
             {templates.map((template) => (
               <li key={template.tplSeq ?? `${template.tplName}-${template.tplExerName}`}>
@@ -61,5 +73,13 @@ export default async function Page({ searchParams }: PageProps) {
         )}
       </section>
     </main>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<main className="app-shell"><p className="state-text">Loading...</p></main>}>
+      <PageContent />
+    </Suspense>
   )
 }
