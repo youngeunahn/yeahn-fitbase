@@ -41,6 +41,7 @@ function PageContent() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <nav className="nav-links">
+            <Link href="/test" className="nav-button secondary">테스트</Link>
             <Link href="/login" className="nav-button secondary">로그인</Link>
             <Link href="/signup" className="nav-button primary">회원가입</Link>
           </nav>
