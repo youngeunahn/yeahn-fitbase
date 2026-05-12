@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import '../App.css'
+import '../../App.css'
 
 export default function TestPage() {
   const [baseUrl, setBaseUrl] = useState(process.env.NEXT_PUBLIC_API_BASE_URL || '')
