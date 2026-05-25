@@ -25,6 +25,8 @@ NEXT_PUBLIC_API_BASE_URL=https://백엔드-운영주소
 
 이 값은 빌드 시점에 브라우저 번들에 포함됩니다. Cloudtype에서 값을 변경했다면 반드시 다시 빌드/재배포해야 합니다.
 
+로컬 개발에서 CORS를 피하려면 `.env.development`의 `NEXT_PUBLIC_API_BASE_URL`은 비워둡니다. 그러면 브라우저는 같은 origin(`/api/...`)으로 요청하고, `next.config.mjs`의 개발용 rewrite가 `http://localhost:8080` 백엔드로 프록시합니다.
+
 ## 현재 코드 동작
 
 - `src/api/client.ts`: `NEXT_PUBLIC_API_BASE_URL`이 있으면 API 요청을 해당 백엔드 주소로 보냅니다.

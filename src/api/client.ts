@@ -1,11 +1,16 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ''
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL || process.env.BACKEND_ORIGIN || 'http://localhost:8080'
 
+function buildApiUrl(path: string) {
+  if (typeof window === 'undefined') {
+    return new URL(path, INTERNAL_API_URL)
+  }
+
+  return new URL(path, API_BASE_URL || window.location.origin)
+}
+
 export async function apiGet<T>(path: string, params: Record<string, string | number | boolean | undefined | null> = {}): Promise<T> {
-  const isServer = typeof window === 'undefined'
-  const baseUrl = isServer ? INTERNAL_API_URL : (API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : ''))
-  
-  const url = new URL(`${baseUrl}${path}`)
+  const url = buildApiUrl(path)
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       url.searchParams.set(key, String(value))
@@ -32,12 +37,9 @@ export async function apiGet<T>(path: string, params: Record<string, string | nu
 }
 
 export async function apiPost<T>(path: string, body: any): Promise<T> {
-  const isServer = typeof window === 'undefined'
-  const baseUrl = isServer ? INTERNAL_API_URL : (API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : ''))
-  
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   
-  const response = await fetch(`${baseUrl}${path}`, {
+  const response = await fetch(buildApiUrl(path).toString(), {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
