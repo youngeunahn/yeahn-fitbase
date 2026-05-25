@@ -23,9 +23,14 @@ export interface ResponseDto<T> {
 }
 
 const AUTH_KEY = 'fitbase_user';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+function buildAuthUrl(path: string) {
+  return `${API_BASE_URL}${path}`;
+}
 
 export async function login(userId: string, password: string): Promise<User> {
-  const response = await fetch('/login/', {
+  const response = await fetch(buildAuthUrl('/login'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId, password }),

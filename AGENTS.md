@@ -28,7 +28,7 @@
 
 ## 보안 및 설정 팁
 
-클라이언트에 노출되는 API 설정은 `NEXT_PUBLIC_API_BASE_URL`을 사용하고, 서버 측 호출에는 `INTERNAL_API_URL`을 사용할 수 있습니다. 정적 Nginx 배포에서는 `nginx.conf`의 `proxy_pass` 대상이 운영 백엔드 주소와 맞는지 확인하세요. 비밀 값이나 환경별 인증 정보는 커밋하지 마세요.
+클라이언트에 노출되는 API 설정은 `NEXT_PUBLIC_API_BASE_URL`을 사용하고, 서버 측 호출에는 `INTERNAL_API_URL`을 사용할 수 있습니다. 정적 export 배포에서는 `NEXT_PUBLIC_API_BASE_URL`이 빌드 시점에 번들에 포함되므로 운영 백엔드 주소를 빌드 환경 변수로 주입해야 합니다. 정적 Nginx 배포에서는 `nginx.conf`의 `proxy_pass` 대상도 운영 백엔드 주소와 맞는지 확인하세요. 비밀 값이나 환경별 인증 정보는 커밋하지 마세요.
 
 ## 서브에이전트 운용
 
