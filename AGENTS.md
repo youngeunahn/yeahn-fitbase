@@ -12,7 +12,7 @@
 - `npm run start`: 생성된 프로덕션 빌드를 로컬에서 실행합니다.
 - `npm run lint`: Next.js ESLint 검사를 실행합니다.
 
-`next.config.mjs`는 정적 배포를 위해 `output: 'export'`를 사용하며, 빌드 산출물은 `out/`에 생성됩니다. 정적 export에서는 Next rewrites가 동작하지 않으므로 `/api`, `/login` 같은 백엔드 프록시는 `nginx.conf` 또는 배포 플랫폼 설정에서 처리합니다.
+`next.config.mjs`는 정적 배포를 위해 `output: 'export'`를 사용하며, 빌드 산출물은 `out/`에 생성됩니다. 정적 export에서는 Next rewrites가 동작하지 않으므로 `/api`, `/login` 같은 요청은 `NEXT_PUBLIC_API_BASE_URL`로 백엔드 운영 주소를 직접 사용하거나, 별도 Nginx/배포 플랫폼 프록시에서 처리합니다. 관련 배포 메모는 `docs/deployment-static-export.md`를 확인하세요.
 
 ## 코딩 스타일 및 네이밍 규칙
 
