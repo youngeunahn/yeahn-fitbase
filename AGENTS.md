@@ -12,7 +12,7 @@
 - `npm run start`: 생성된 프로덕션 빌드를 로컬에서 실행합니다.
 - `npm run lint`: Next.js ESLint 검사를 실행합니다.
 
-`next.config.mjs`는 `/api/:path*`와 `/login` 요청을 `BACKEND_ORIGIN` 백엔드로 프록시합니다. 값이 없으면 `http://localhost:8080`을 기본값으로 사용하므로, 로컬 API 연동 화면을 확인할 때는 백엔드도 함께 실행하세요.
+`next.config.mjs`는 정적 배포를 위해 `output: 'export'`를 사용하며, 빌드 산출물은 `out/`에 생성됩니다. 정적 export에서는 Next rewrites가 동작하지 않으므로 `/api`, `/login` 같은 백엔드 프록시는 `nginx.conf` 또는 배포 플랫폼 설정에서 처리합니다.
 
 ## 코딩 스타일 및 네이밍 규칙
 
@@ -28,7 +28,7 @@
 
 ## 보안 및 설정 팁
 
-클라이언트에 노출되는 API 설정은 `NEXT_PUBLIC_API_BASE_URL`을 사용하고, 서버 측 호출에는 `INTERNAL_API_URL`을 사용할 수 있습니다. `next.config.mjs`의 rewrite 대상은 `BACKEND_ORIGIN`으로 설정하며, 값이 없으면 로컬 기본값 `http://localhost:8080`을 사용합니다. 운영 배포에서는 `BACKEND_ORIGIN=https://운영-백엔드-주소`처럼 환경 변수로 주입하세요. 비밀 값이나 환경별 인증 정보는 커밋하지 마세요.
+클라이언트에 노출되는 API 설정은 `NEXT_PUBLIC_API_BASE_URL`을 사용하고, 서버 측 호출에는 `INTERNAL_API_URL`을 사용할 수 있습니다. 정적 Nginx 배포에서는 `nginx.conf`의 `proxy_pass` 대상이 운영 백엔드 주소와 맞는지 확인하세요. 비밀 값이나 환경별 인증 정보는 커밋하지 마세요.
 
 ## 서브에이전트 운용
 
