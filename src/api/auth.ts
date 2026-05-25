@@ -25,7 +25,7 @@ export interface ResponseDto<T> {
 const AUTH_KEY = 'fitbase_user';
 
 export async function login(userId: string, password: string): Promise<User> {
-  const response = await fetch('/login', {
+  const response = await fetch('/login/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId, password }),
