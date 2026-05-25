@@ -1,40 +1,76 @@
-import { apiGet } from './client'
+import { apiGet, apiPost } from './client'
 
 export interface User {
-  id: string;
-  email: string;
-  name?: string;
+  userId: string;
+  userPwd?: string;
+  userName?: string;
+  userAuth?: string;
+  grpAuth?: string;
+  email1?: string;
+  email2?: string;
+  useYn?: string;
+  delYn?: string;
+  lockYn?: string;
+  loginFailCnt?: string;
+  insDt?: string;
+  insIp?: string;
 }
 
-export async function login(email: string, password: string): Promise<{ user: User; token: string }> {
-  // 실제 구현 시에는 POST 요청을 사용해야 하며 client.ts에 apiPost 등을 추가해야 할 수 있습니다.
-  // 현재 client.ts에는 apiGet만 있으므로, 일단 형식을 맞춥니다.
-  console.log('Logging in with:', email)
+export interface ResponseDto<T> {
+  status: string;
+  message: string;
+  data: T;
+}
+
+const AUTH_KEY = 'fitbase_user';
+
+export async function login(userId: string, password: string): Promise<User> {
+  const response = await fetch('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, password }),
+    credentials: 'include'
+  });
+
+  // Spring Security는 성공 시 보통 리다이렉트(302)를 보냅니다.
+  // fetch는 리다이렉트를 따라간 최종 결과(보통 메인페이지 HTML)를 반환하므로 
+  // response.ok 또는 response.redirected가 true이면 성공으로 간주합니다.
+  if (response.ok || response.redirected) {
+    const userData: User = { userId }; // 세션 방식이므로 최소 정보만 저장
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(AUTH_KEY, JSON.stringify(userData));
+    }
+    return userData;
+  }
   
-  // 백엔드 API가 준비되었다고 가정하고 fetch 호출 (client.ts의 apiGet을 참고하여 확장 가능)
-  const response = await fetch('/api/user/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  })
-
-  if (!response.ok) {
-    throw new Error('Login failed')
-  }
-
-  return response.json()
+  throw new Error('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
 }
 
-export async function signup(userData: any): Promise<{ user: User; token: string }> {
-  const response = await fetch('/api/user/signup', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData),
-  })
-
-  if (!response.ok) {
-    throw new Error('Signup failed')
+export async function signup(userData: any): Promise<string> {
+  const response = await apiPost<ResponseDto<string>>('/api/user/signUp', userData);
+  if (response.status === 'SUCCESS') {
+    return response.message;
   }
+  throw new Error(response.message);
+}
 
-  return response.json()
+export function checkIdDuplicate(userId: string): Promise<ResponseDto<boolean>> {
+  return apiGet<ResponseDto<boolean>>('/api/user/check-id', { userId });
+}
+
+export function logout() {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(AUTH_KEY);
+  }
+}
+
+export function getLocalUser(): User | null {
+  if (typeof window === 'undefined') return null;
+  const user = localStorage.getItem(AUTH_KEY);
+  return user ? JSON.parse(user) : null;
+}
+
+export function isAuthenticated() {
+  return !!getLocalUser();
 }

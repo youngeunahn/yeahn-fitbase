@@ -8,7 +8,7 @@ import '../../App.css'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [userId, setUserId] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -19,10 +19,10 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      await login(email, password)
+      await login(userId, password)
       router.push('/')
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.')
+      setError(err.message || '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.')
     } finally {
       setLoading(false)
     }
@@ -31,24 +31,33 @@ export default function LoginPage() {
   return (
     <main className="auth-container">
       <div className="auth-card">
-        <h2>로그인</h2>
-        <p>FitBase 서비스에 로그인하세요</p>
+        <div className="auth-header">
+          <div className="auth-logo">FitBase</div>
+          <h2>로그인</h2>
+          <p>운동 관리를 시작해보세요</p>
+        </div>
         
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">이메일</label>
+            <label htmlFor="userId">아이디</label>
             <input
-              id="email"
-              type="email"
-              placeholder="example@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="userId"
+              type="text"
+              placeholder="아이디를 입력하세요"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
               required
+              autoComplete="username"
             />
           </div>
           
           <div className="form-group">
-            <label htmlFor="password">비밀번호</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label htmlFor="password">비밀번호</label>
+              <Link href="#" className="forgot-password" style={{ fontSize: '12px', color: '#863bff', textDecoration: 'none' }}>
+                비밀번호를 잊으셨나요?
+              </Link>
+            </div>
             <input
               id="password"
               type="password"
@@ -56,10 +65,11 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
             />
           </div>
 
-          {error && <p style={{ color: '#d32f2f', margin: '8px 0', fontSize: '13px' }}>{error}</p>}
+          {error && <div className="error-message">{error}</div>}
 
           <button type="submit" className="auth-button" disabled={loading}>
             {loading ? '로그인 중...' : '로그인'}

@@ -110,44 +110,56 @@ select {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 80px);
+  min-height: 100vh;
   padding: 20px;
+  background: #f8faf9;
 }
 
 .auth-card {
   width: 100%;
   max-width: 400px;
-  padding: 32px;
+  padding: 40px 32px;
   border: 1px solid #d7e1dc;
-  border-radius: 12px;
+  border-radius: 16px;
   background: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-logo {
+  font-size: 32px;
+  font-weight: 800;
+  color: #863bff;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
 }
 
 .auth-card h2 {
   margin: 0 0 8px;
   font-size: 24px;
   color: #17211c;
-  text-align: center;
 }
 
 .auth-card p {
-  margin: 0 0 24px;
-  font-size: 14px;
+  margin: 0;
+  font-size: 15px;
   color: #62726b;
-  text-align: center;
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .form-group label {
@@ -157,34 +169,52 @@ select {
 }
 
 .form-group input {
-  height: 44px;
-  padding: 0 12px;
+  height: 48px;
+  padding: 0 14px;
   border: 1px solid #b9c8c0;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 15px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .form-group input:focus {
   border-color: #863bff;
+  box-shadow: 0 0 0 3px rgba(134, 59, 255, 0.1);
+}
+
+.error-message {
+  padding: 10px 12px;
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  border-radius: 6px;
+  color: #c53030;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .auth-button {
-  height: 44px;
+  height: 48px;
   margin-top: 8px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #863bff;
   color: #fff;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .auth-button:hover {
   background: #7126eb;
+  transform: translateY(-1px);
+}
+
+.auth-button:disabled {
+  background: #b9c8c0;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .auth-footer {

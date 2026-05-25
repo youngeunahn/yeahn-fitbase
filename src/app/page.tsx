@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { getTemplates, Template } from '../api/templates'
+import { isAuthenticated, logout } from '../api/auth'
 import TypeCodeSelector from '../components/TypeCodeSelector'
 import Link from 'next/link'
 import '../App.css'
@@ -14,8 +15,11 @@ function PageContent() {
   const [templates, setTemplates] = useState<Template[]>([])
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
+    setIsLoggedIn(isAuthenticated())
+    
     const fetchTemplates = async () => {
       setLoading(true)
       try {
@@ -32,6 +36,12 @@ function PageContent() {
     fetchTemplates()
   }, [typeCode])
 
+  const handleLogout = () => {
+    logout()
+    setIsLoggedIn(false)
+    window.location.reload()
+  }
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -41,9 +51,18 @@ function PageContent() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <nav className="nav-links">
+            {isLoggedIn ? (
+              <>
+                <Link href="/plan/add" className="nav-button primary">운동계획 추가</Link>
+                <button onClick={handleLogout} className="nav-button secondary" style={{ cursor: 'pointer', border: '1px solid #d7e1dc' }}>로그아웃</button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="nav-button secondary">로그인</Link>
+                <Link href="/signup" className="nav-button primary">회원가입</Link>
+              </>
+            )}
             <Link href="/test" className="nav-button secondary">테스트</Link>
-            <Link href="/login" className="nav-button secondary">로그인</Link>
-            <Link href="/signup" className="nav-button primary">회원가입</Link>
           </nav>
           <TypeCodeSelector initialTypeCode={typeCode} />
         </div>

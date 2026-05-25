@@ -1,4 +1,5 @@
 import { apiGet } from './client'
+import type { ResponseDto } from './auth'
 
 export interface Template {
   tplSeq: number;
@@ -11,6 +12,10 @@ export interface Template {
   [key: string]: any;
 }
 
-export function getTemplates(params: Record<string, string | number | boolean | undefined | null>) {
-  return apiGet<Template[]>('/api/user/templates', params)
+export async function getTemplates(params: Record<string, string | number | boolean | undefined | null>) {
+  const response = await apiGet<ResponseDto<Template[]>>('/api/user/templates', params)
+  if (response.status === 'SUCCESS') {
+    return response.data
+  }
+  throw new Error(response.message)
 }

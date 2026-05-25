@@ -3,48 +3,81 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { signup } from '../../api/auth'
+import { signup, checkIdDuplicate } from '../../api/auth'
 import '../../App.css'
 
 export default function SignupPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
+    userId: '',
+    userName: '',
+    userEmail: '',
+    userPwd: '',
     confirmPassword: '',
   })
+  const [idChecked, setIdChecked] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    })
+    const { id, value } = e.target
+    setFormData({ ...formData, [id]: value })
+    if (id === 'userId') setIdChecked(false)
+  }
+
+  const handleCheckId = async () => {
+    if (!formData.userId) {
+      setError('아이디를 입력해주세요.')
+      return
+    }
+    try {
+      const response = await checkIdDuplicate(formData.userId)
+      if (response.data) {
+        setError('이미 사용 중인 아이디입니다.')
+        setIdChecked(false)
+      } else {
+        alert('사용 가능한 아이디입니다.')
+        setIdChecked(true)
+        setError('')
+      }
+    } catch (err: any) {
+      setError('아이디 중복 확인 중 오류가 발생했습니다.')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    if (formData.password !== formData.confirmPassword) {
+    if (!idChecked) {
+      setError('아이디 중복 확인이 필요합니다.')
+      return
+    }
+
+    if (formData.userPwd !== formData.confirmPassword) {
       setError('비밀번호가 일치하지 않습니다.')
       return
     }
 
     setLoading(true)
 
+    // 이메일 분리 처리 (example@email.com -> email1: example, email2: email.com)
+    const emailParts = formData.userEmail.split('@')
+    const email1 = emailParts[0] || ''
+    const email2 = emailParts[1] || ''
+
     try {
       await signup({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
+        userId: formData.userId,
+        userName: formData.userName,
+        email1: email1,
+        email2: email2,
+        userPwd: formData.userPwd,
       })
       alert('회원가입이 완료되었습니다. 로그인해주세요.')
       router.push('/login')
     } catch (err: any) {
-      setError(err.message || 'Signup failed. Please try again.')
+      setError(err.message || '회원가입에 실패했습니다.')
     } finally {
       setLoading(false)
     }
@@ -53,41 +86,67 @@ export default function SignupPage() {
   return (
     <main className="auth-container">
       <div className="auth-card">
-        <h2>회원가입</h2>
-        <p>새로운 계정을 만드세요</p>
+        <div className="auth-header">
+          <div className="auth-logo">FitBase</div>
+          <h2>회원가입</h2>
+          <p>나만의 운동 루틴을 만들어보세요</p>
+        </div>
         
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">이름</label>
+            <label htmlFor="userId">아이디</label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                id="userId"
+                type="text"
+                placeholder="아이디"
+                value={formData.userId}
+                onChange={handleChange}
+                style={{ flex: 1 }}
+                required
+              />
+              <button 
+                type="button" 
+                onClick={handleCheckId}
+                className="nav-button secondary"
+                style={{ padding: '0 12px', height: '48px', whiteSpace: 'nowrap' }}
+              >
+                중복확인
+              </button>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="userName">이름</label>
             <input
-              id="name"
+              id="userName"
               type="text"
-              placeholder="홍길동"
-              value={formData.name}
+              placeholder="이름"
+              value={formData.userName}
               onChange={handleChange}
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">이메일</label>
+            <label htmlFor="userEmail">이메일</label>
             <input
-              id="email"
+              id="userEmail"
               type="email"
               placeholder="example@email.com"
-              value={formData.email}
+              value={formData.userEmail}
               onChange={handleChange}
               required
             />
           </div>
           
           <div className="form-group">
-            <label htmlFor="password">비밀번호</label>
+            <label htmlFor="userPwd">비밀번호</label>
             <input
-              id="password"
+              id="userPwd"
               type="password"
-              placeholder="••••••••"
-              value={formData.password}
+              placeholder="비밀번호"
+              value={formData.userPwd}
               onChange={handleChange}
               required
             />
@@ -98,17 +157,17 @@ export default function SignupPage() {
             <input
               id="confirmPassword"
               type="password"
-              placeholder="••••••••"
+              placeholder="비밀번호 확인"
               value={formData.confirmPassword}
               onChange={handleChange}
               required
             />
           </div>
 
-          {error && <p style={{ color: '#d32f2f', margin: '8px 0', fontSize: '13px' }}>{error}</p>}
+          {error && <div className="error-message">{error}</div>}
 
           <button type="submit" className="auth-button" disabled={loading}>
-            {loading ? '가입 중...' : '회원가입'}
+            {loading ? '가입 처리 중...' : '회원가입'}
           </button>
         </form>
 
