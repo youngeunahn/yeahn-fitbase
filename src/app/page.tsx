@@ -36,8 +36,8 @@ function PageContent() {
     fetchTemplates()
   }, [typeCode])
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     setIsLoggedIn(false)
     window.location.reload()
   }

@@ -26,7 +26,11 @@ const AUTH_KEY = 'fitbase_user';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
 function buildAuthUrl(path: string) {
-  return `${API_BASE_URL}${path}`;
+  if (typeof window === 'undefined') {
+    return `${API_BASE_URL}${path}`;
+  }
+
+  return new URL(path, API_BASE_URL || window.location.origin).toString();
 }
 
 export async function login(userId: string, password: string): Promise<User> {
@@ -64,7 +68,21 @@ export function checkIdDuplicate(userId: string): Promise<ResponseDto<boolean>> 
   return apiGet<ResponseDto<boolean>>('/api/user/check-id', { userId });
 }
 
-export function logout() {
+export async function logout() {
+  try {
+    await fetch(buildAuthUrl('/logout'), {
+      method: 'POST',
+      credentials: 'include',
+    });
+  } finally {
+    // 서버 세션이 이미 없어도 화면의 로그인 캐시는 반드시 지웁니다.
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(AUTH_KEY);
+    }
+  }
+}
+
+export function clearLocalUser() {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(AUTH_KEY);
   }
