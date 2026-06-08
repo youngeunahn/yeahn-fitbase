@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signup, checkIdDuplicate } from '../../api/auth'
@@ -87,7 +88,15 @@ export default function SignupPage() {
     <main className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo">FitBase</div>
+          <Image
+            className="auth-logo"
+            src="/logo.png"
+            alt="FitBase"
+            width={440}
+            height={125}
+            priority
+            unoptimized
+          />
           <h2>회원가입</h2>
           <p>나만의 운동 루틴을 만들어보세요</p>
         </div>

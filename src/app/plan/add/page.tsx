@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { savePlan, Plan, PlanDetail } from '../../../api/plans'
-import { isAuthenticated } from '../../../api/auth'
+import { isAuthenticated, logout } from '../../../api/auth'
 import styles from './page.module.css'
 import '../../../App.css'
 
@@ -116,6 +116,11 @@ export default function AddPlanPage() {
     }
   }
 
+  const handleLogout = async () => {
+    await logout()
+    router.replace('/')
+  }
+
   if (!isReady) return null;
 
   return (
@@ -125,6 +130,9 @@ export default function AddPlanPage() {
           <p className="eyebrow">WORKOUT PLAN</p>
           <h1>운동계획 추가</h1>
         </div>
+        <button type="button" className="nav-button secondary" onClick={handleLogout}>
+          로그아웃
+        </button>
       </div>
 
       <div className={styles['plan-card']}>

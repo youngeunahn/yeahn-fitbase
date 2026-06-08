@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { login } from '../../api/auth'
+import { isAuthenticated, login } from '../../api/auth'
 import '../../App.css'
 
 export default function LoginPage() {
@@ -13,6 +14,12 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    if (isAuthenticated()) {
+      router.replace('/plan/add')
+    }
+  }, [router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -20,7 +27,7 @@ export default function LoginPage() {
 
     try {
       await login(userId, password)
-      router.push('/')
+      router.replace('/plan/add')
     } catch (err: any) {
       setError(err.message || '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.')
     } finally {
@@ -32,7 +39,15 @@ export default function LoginPage() {
     <main className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo">FitBase</div>
+          <Image
+            className="auth-logo"
+            src="/logo.png"
+            alt="FitBase"
+            width={440}
+            height={125}
+            priority
+            unoptimized
+          />
           <h2>로그인</h2>
           <p>운동 관리를 시작해보세요</p>
         </div>
