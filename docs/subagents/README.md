@@ -6,6 +6,7 @@
 
 - `nextjs-expert`: Next.js App Router, React, TypeScript 구조 검토
 - `api-integration-expert`: Spring Boot 백엔드 API 연동과 응답 규약 검토
+- `design-ux-expert`: 사용자 흐름, 정보 구조, 시각적 일관성, 접근성 검토
 - `ui-css-expert`: 화면 구조, CSS 영향 범위, 반응형 UI 검토
 - `test-build-expert`: lint, build, 테스트 도입, CI 검증 순서 검토
 - `deployment-expert`: 배포 설정, rewrite, 환경 변수, Nginx 검토
@@ -14,6 +15,7 @@
 
 - 새 라우트, App Router 구조, TypeScript 경계는 `nextjs-expert.md`를 기준으로 검토합니다.
 - API 호출, 인증, 백엔드 응답 규약은 `api-integration-expert.md`를 기준으로 검토합니다.
+- 화면 흐름, 정보 구조, 브랜드 톤, 접근성은 `design-ux-expert.md`를 기준으로 검토합니다.
 - 화면 구조, CSS 영향 범위, 반응형 품질은 `ui-css-expert.md`를 기준으로 검토합니다.
 - lint, build, 테스트 도입, CI 검증은 `test-build-expert.md`를 기준으로 검토합니다.
 - 배포, rewrite, Nginx, 환경 변수는 `deployment-expert.md`를 기준으로 검토합니다.

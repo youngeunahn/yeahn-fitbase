@@ -36,6 +36,7 @@
 
 - `docs/subagents/nextjs-expert.md`: 라우트, App Router, React/TypeScript 구조 변경
 - `docs/subagents/api-integration-expert.md`: API 호출, 인증, 백엔드 응답 규약, rewrite
+- `docs/subagents/design-ux-expert.md`: 사용자 흐름, 정보 구조, 브랜드 톤, 접근성
 - `docs/subagents/ui-css-expert.md`: 화면 구성, CSS 영향 범위, 반응형 UI
 - `docs/subagents/test-build-expert.md`: lint, build, 테스트, CI 검증
 - `docs/subagents/deployment-expert.md`: 배포, 환경 변수, Nginx, 운영 연결
