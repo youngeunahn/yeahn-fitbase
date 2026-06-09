@@ -34,18 +34,28 @@ function buildAuthUrl(path: string) {
 }
 
 export async function login(userId: string, password: string): Promise<User> {
+  const formData = new URLSearchParams();
+  formData.set('userId', userId);
+  formData.set('password', password);
+
   const response = await fetch(buildAuthUrl('/login'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, password }),
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData,
     credentials: 'include'
   });
 
-  // Spring Security는 성공 시 보통 리다이렉트(302)를 보냅니다.
-  // fetch는 리다이렉트를 따라간 최종 결과(보통 메인페이지 HTML)를 반환하므로 
-  // response.ok 또는 response.redirected가 true이면 성공으로 간주합니다.
-  if (response.ok || response.redirected) {
-    const userData: User = { userId }; // 세션 방식이므로 최소 정보만 저장
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error('로그인 응답 형식이 올바르지 않습니다.');
+  }
+
+  const result = await response.json() as ResponseDto<string>;
+  if (response.ok && result.status === 'SUCCESS') {
+    const userData: User = { userId: result.data || userId };
     
     if (typeof window !== 'undefined') {
       localStorage.setItem(AUTH_KEY, JSON.stringify(userData));
@@ -53,7 +63,11 @@ export async function login(userId: string, password: string): Promise<User> {
     return userData;
   }
   
-  throw new Error('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
+  if (response.status === 401) {
+    throw new Error('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
+  }
+
+  throw new Error(result.message || '로그인에 실패했습니다. 잠시 후 다시 시도해주세요.');
 }
 
 export async function signup(userData: any): Promise<string> {
@@ -72,6 +86,7 @@ export async function logout() {
   try {
     await fetch(buildAuthUrl('/logout'), {
       method: 'POST',
+      headers: { Accept: 'application/json' },
       credentials: 'include',
     });
   } finally {
@@ -91,7 +106,14 @@ export function clearLocalUser() {
 export function getLocalUser(): User | null {
   if (typeof window === 'undefined') return null;
   const user = localStorage.getItem(AUTH_KEY);
-  return user ? JSON.parse(user) : null;
+  if (!user) return null;
+
+  try {
+    return JSON.parse(user) as User;
+  } catch {
+    localStorage.removeItem(AUTH_KEY);
+    return null;
+  }
 }
 
 export function isAuthenticated() {
