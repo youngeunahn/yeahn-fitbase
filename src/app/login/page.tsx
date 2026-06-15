@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { isAuthenticated, login } from '../../api/auth'
+import { fetchCurrentUser, login } from '../../api/auth'
 import '../../App.css'
 
 export default function LoginPage() {
@@ -15,8 +15,20 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (isAuthenticated()) {
-      router.replace('/plan/add')
+    let mounted = true
+
+    fetchCurrentUser()
+      .then(() => {
+        if (mounted) {
+          router.replace('/plan/add')
+        }
+      })
+      .catch(() => {
+        // 로그인 페이지는 인증되지 않은 상태가 정상 진입 경로다.
+      })
+
+    return () => {
+      mounted = false
     }
   }, [router])
 

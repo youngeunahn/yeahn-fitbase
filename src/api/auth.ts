@@ -5,6 +5,7 @@ export interface User {
   userPwd?: string;
   userName?: string;
   userAuth?: string;
+  role?: string;
   grpAuth?: string;
   email1?: string;
   email2?: string;
@@ -22,7 +23,17 @@ export interface ResponseDto<T> {
   data: T;
 }
 
+export interface UserTokenResponse {
+  tokenType: string;
+  accessToken: string;
+  expiresIn: number;
+  userId: string;
+  userName: string;
+  role: string;
+}
+
 const AUTH_KEY = 'fitbase_user';
+const TOKEN_KEY = 'fitbase_token';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
 function buildAuthUrl(path: string) {
@@ -34,18 +45,12 @@ function buildAuthUrl(path: string) {
 }
 
 export async function login(userId: string, password: string): Promise<User> {
-  const formData = new URLSearchParams();
-  formData.set('userId', userId);
-  formData.set('password', password);
-
-  const response = await fetch(buildAuthUrl('/login'), {
+  const response = await fetch(buildAuthUrl('/api/user/login'), {
     method: 'POST',
     headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     },
-    body: formData,
-    credentials: 'include'
+    body: JSON.stringify({ userId, password }),
   });
 
   const contentType = response.headers.get('content-type') || '';
@@ -53,12 +58,19 @@ export async function login(userId: string, password: string): Promise<User> {
     throw new Error('로그인 응답 형식이 올바르지 않습니다.');
   }
 
-  const result = await response.json() as ResponseDto<string>;
+  const result = await response.json() as ResponseDto<UserTokenResponse>;
   if (response.ok && result.status === 'SUCCESS') {
-    const userData: User = { userId: result.data || userId };
+    const token = result.data;
+    const userData: User = {
+      userId: token.userId,
+      userName: token.userName,
+      userAuth: token.role,
+      role: token.role,
+    };
     
     if (typeof window !== 'undefined') {
       localStorage.setItem(AUTH_KEY, JSON.stringify(userData));
+      localStorage.setItem(TOKEN_KEY, token.accessToken);
     }
     return userData;
   }
@@ -68,6 +80,39 @@ export async function login(userId: string, password: string): Promise<User> {
   }
 
   throw new Error(result.message || '로그인에 실패했습니다. 잠시 후 다시 시도해주세요.');
+}
+
+export async function fetchCurrentUser(): Promise<User> {
+  const token = getAccessToken();
+  if (!token) {
+    throw new Error('로그인이 필요합니다.');
+  }
+
+  const response = await fetch(buildAuthUrl('/api/user/me'), {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status === 401) {
+    clearLocalUser();
+    throw new Error('로그인이 필요합니다.');
+  }
+
+  if (!response.ok) {
+    throw new Error('사용자 정보를 불러오지 못했습니다.');
+  }
+
+  const result = await response.json() as ResponseDto<User>;
+  if (result.status !== 'SUCCESS') {
+    throw new Error(result.message || '사용자 정보를 불러오지 못했습니다.');
+  }
+
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(AUTH_KEY, JSON.stringify(result.data));
+  }
+
+  return result.data;
 }
 
 export async function signup(userData: any): Promise<string> {
@@ -83,24 +128,19 @@ export function checkIdDuplicate(userId: string): Promise<ResponseDto<boolean>> 
 }
 
 export async function logout() {
-  try {
-    await fetch(buildAuthUrl('/logout'), {
-      method: 'POST',
-      headers: { Accept: 'application/json' },
-      credentials: 'include',
-    });
-  } finally {
-    // 서버 세션이 이미 없어도 화면의 로그인 캐시는 반드시 지웁니다.
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(AUTH_KEY);
-    }
-  }
+  clearLocalUser();
 }
 
 export function clearLocalUser() {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(AUTH_KEY);
+    localStorage.removeItem(TOKEN_KEY);
   }
+}
+
+export function getAccessToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 export function getLocalUser(): User | null {
@@ -117,5 +157,5 @@ export function getLocalUser(): User | null {
 }
 
 export function isAuthenticated() {
-  return !!getLocalUser();
+  return !!getLocalUser() && !!getAccessToken();
 }

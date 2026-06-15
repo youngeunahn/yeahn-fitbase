@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { savePlan, Plan, PlanDetail } from '../../../api/plans'
-import { isAuthenticated, logout } from '../../../api/auth'
+import { fetchCurrentUser, logout } from '../../../api/auth'
 import styles from './page.module.css'
 import '../../../App.css'
 
@@ -19,13 +19,13 @@ const CATEGORY_OPTIONS = [
   { label: '배영', value: 'BACKSTROKE' },
   { label: '평영', value: 'BREASTSTROKE' },
   { label: '접영', value: 'BUTTERFLY' },
-  { label: '혼영', value: 'IM' },
+  { label: '개인혼영', value: 'IM' },
   { label: '기타', value: 'ETC' },
 ]
 
 const TYPE_OPTIONS = [
   { label: '수영', value: 'SWIM' },
-  { label: '웨이트', value: 'GYM' },
+  { label: '헬스', value: 'GYM' },
 ]
 
 export default function AddPlanPage() {
@@ -35,11 +35,23 @@ export default function AddPlanPage() {
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      alert('로그인이 필요한 서비스입니다.')
-      router.push('/login')
-    } else {
-      setIsReady(true)
+    let mounted = true
+
+    fetchCurrentUser()
+      .then(() => {
+        if (mounted) {
+          setIsReady(true)
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          alert('로그인이 필요한 서비스입니다.')
+          router.push('/login')
+        }
+      })
+
+    return () => {
+      mounted = false
     }
   }, [router])
 
@@ -145,7 +157,7 @@ export default function AddPlanPage() {
                 name="planName"
                 value={plan.planName}
                 onChange={handlePlanChange}
-                placeholder="예: 자유형 드릴 연습"
+                placeholder="예: 자유형 지구력 연습"
                 required
               />
             </div>
@@ -191,7 +203,7 @@ export default function AddPlanPage() {
                     <th style={{ width: '120px' }}>카테고리</th>
                     <th>운동명</th>
                     <th style={{ width: '60px' }}>세트</th>
-                    <th style={{ width: '60px' }}>회수</th>
+                    <th style={{ width: '60px' }}>횟수</th>
                     <th style={{ width: '70px' }}>거리(m)</th>
                     <th>비고</th>
                     <th style={{ width: '40px' }}></th>

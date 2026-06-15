@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { isAuthenticated } from '../api/auth'
+import { fetchCurrentUser } from '../api/auth'
 import heroImage from '../assets/hero.png'
 import styles from './page.module.css'
 
@@ -34,12 +34,23 @@ export default function Page() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
   useEffect(() => {
-    if (isAuthenticated()) {
-      router.replace('/plan/add')
-      return
-    }
+    let mounted = true
 
-    setIsCheckingAuth(false)
+    fetchCurrentUser()
+      .then(() => {
+        if (mounted) {
+          router.replace('/plan/add')
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setIsCheckingAuth(false)
+        }
+      })
+
+    return () => {
+      mounted = false
+    }
   }, [router])
 
   if (isCheckingAuth) {

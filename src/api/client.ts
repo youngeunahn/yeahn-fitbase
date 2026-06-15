@@ -1,5 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ''
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL || process.env.BACKEND_ORIGIN || 'http://localhost:8080'
+const TOKEN_KEY = 'fitbase_token'
 
 function buildApiUrl(path: string) {
   if (typeof window === 'undefined') {
@@ -7,6 +8,15 @@ function buildApiUrl(path: string) {
   }
 
   return new URL(path, API_BASE_URL || window.location.origin)
+}
+
+function getAuthHeaders(): Record<string, string> {
+  if (typeof window === 'undefined') {
+    return {}
+  }
+
+  const token = localStorage.getItem(TOKEN_KEY)
+  return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
 export async function apiGet<T>(path: string, params: Record<string, string | number | boolean | undefined | null> = {}): Promise<T> {
@@ -19,7 +29,7 @@ export async function apiGet<T>(path: string, params: Record<string, string | nu
 
   const response = await fetch(url.toString(), {
     next: { revalidate: 0 },
-    credentials: 'include' // 세션 쿠키 전송을 위해 추가
+    headers: getAuthHeaders(),
   } as RequestInit)
 
   if (!response.ok) {
@@ -37,13 +47,12 @@ export async function apiGet<T>(path: string, params: Record<string, string | nu
 }
 
 export async function apiPost<T>(path: string, body: any): Promise<T> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', ...getAuthHeaders() }
   
   const response = await fetch(buildApiUrl(path).toString(), {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
-    credentials: 'include' // 세션 쿠키 전송을 위해 추가
   })
 
   if (!response.ok) {

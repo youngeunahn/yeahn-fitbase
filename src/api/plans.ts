@@ -1,4 +1,5 @@
 import { apiPost } from './client'
+import type { ResponseDto } from './auth'
 
 export interface PlanDetail {
   planDetailSeq: number | null;
@@ -21,5 +22,5 @@ export interface Plan {
 }
 
 export function savePlan(plan: Plan) {
-  return apiPost<Plan>('/api/exercise/plan/save', plan)
+  return apiPost<ResponseDto<number>>('/api/user/plans', plan)
 }
