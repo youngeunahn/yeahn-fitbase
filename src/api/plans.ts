@@ -1,4 +1,4 @@
-import { apiPost } from './client'
+import { apiGet, apiPost } from './client'
 import type { ResponseDto } from './auth'
 
 export interface PlanDetail {
@@ -23,4 +23,13 @@ export interface Plan {
 
 export function savePlan(plan: Plan) {
   return apiPost<ResponseDto<number>>('/api/user/plans', plan)
+}
+
+export async function fetchPlans() {
+  const response = await apiGet<ResponseDto<Plan[]>>('/api/user/plans')
+  if (response.status === 'SUCCESS') {
+    return response.data
+  }
+
+  throw new Error(response.message || '운동계획 목록을 불러오지 못했습니다.')
 }
